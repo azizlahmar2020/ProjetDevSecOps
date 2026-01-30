@@ -67,7 +67,7 @@ pipeline {
             }
         }
 
-       stage('Deploy Helm Chart To kind') {
+    stage('Deploy Helm Chart To kind') {
     steps {
         sh '''
         export KUBECONFIG=/var/lib/jenkins/kubeconfig-kind
