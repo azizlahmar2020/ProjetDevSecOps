@@ -70,6 +70,7 @@ pipeline {
         stage('Deploy Helm Chart To kind') {
     steps {
         sh '''
+        
         # Exporter la variable KUBECONFIG pointant vers le fichier kubeconfig personnalisé
         export KUBECONFIG=/var/lib/jenkins/kubeconfig-kind-3nodes
         
