@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "python-app.fullname" . }}
+  labels:
+    app: {{ include "python-app.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "python-app.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "python-app.name" . }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+          env:
+            - name: DB_HOST
+              value: {{ .Values.env.DB_HOST | quote }}
+            - name: DB_USER
+              value: {{ .Values.env.DB_USER | quote }}
+            - name: DB_PASSWORD
+              value: {{ .Values.env.DB_PASSWORD | quote }}
+            - name: DB_NAME
+              value: {{ .Values.env.DB_NAME | quote }}

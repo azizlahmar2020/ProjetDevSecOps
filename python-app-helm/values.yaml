@@ -1,0 +1,17 @@
+replicaCount: 1
+
+image:
+  repository: my-python-app
+  tag: latest
+  pullPolicy: IfNotPresent # Important pour image locale chargée dans Kind
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 5000 # Port exposé par l'application Flask
+
+env:
+  DB_HOST: "mysql-service" # À adapter selon votre service MySQL
+  DB_USER: "root"
+  DB_PASSWORD: "password"
+  DB_NAME: "test_db"
