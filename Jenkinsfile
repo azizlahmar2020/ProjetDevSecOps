@@ -67,15 +67,21 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
-            steps {
-                echo '☸️ Déploiement Kubernetes'
-                sh '''
-                kubectl apply -f k8s/
-                kubectl rollout restart deployment/python-app-deployment || true
-                '''
-            }
-        }
+        stage('Deploy Helm Chart To kind') {
+    steps {
+        sh '''
+        # Exporter la variable KUBECONFIG pointant vers le fichier kubeconfig personnalisé
+        export KUBECONFIG=/var/lib/jenkins/kubeconfig-kind-3nodes
+        
+        # Vérifier la connexion au cluster
+        kubectl get nodes
+        
+        # Déployer ou mettre à jour la release Helm
+        helm upgrade -i python-app ./python-app-helm
+        '''
+    }
+}
+
     }
 
     post {
