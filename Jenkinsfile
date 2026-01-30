@@ -67,11 +67,11 @@ pipeline {
             }
         }
 
-      stage('Deploy Helm Chart To kind') {
+     stage('Deploy Helm Chart To kind') {
     steps {
         sh '''
+        export PATH=$PATH:/snap/bin
         export KUBECONFIG=/var/lib/jenkins/kubeconfig-kind
-        export PATH=$PATH:/usr/local/bin  # <-- ajoute le chemin où Helm est installé
         echo "🌐 Vérification des nodes du cluster"
         kubectl get nodes
         echo "🚀 Déploiement Helm Chart"
@@ -79,6 +79,7 @@ pipeline {
         '''
     }
 }
+
 
     post {
         success {
