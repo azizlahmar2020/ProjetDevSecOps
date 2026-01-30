@@ -67,11 +67,13 @@ pipeline {
             }
         }
 
-    stage('Deploy Helm Chart To kind') {
+   stage('Deploy Helm Chart To kind') {
     steps {
         sh '''
         export KUBECONFIG=/var/lib/jenkins/kubeconfig-kind
+        echo "🌐 Vérification des nodes du cluster"
         kubectl get nodes
+        echo "🚀 Déploiement Helm Chart"
         helm upgrade -i python-app ./python-app-helm
         '''
     }
