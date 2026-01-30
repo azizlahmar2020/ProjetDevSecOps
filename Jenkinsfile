@@ -17,15 +17,27 @@ pipeline {
 
         stage('Build Python App') {
              steps {
-                // Pour l'instant on fait juste un print, l'install est faite dans le Dockerfile
-                // Mais on pourrait vouloir lancer des tests unitaires ici avant de build l'image
                 echo 'Building Application Logic...'
                 sh """
-                if [ ! -d "${VENV_NAME}" ]; then
-                    python3 -m venv ${VENV_NAME}
+                # Nettoyage de l'environnement précédent (fix pour problème venv/bin/activate)
+                rm -rf ${VENV_NAME}
+                
+                echo "Vérification de la version Python..."
+                python3 --version || echo "python3 non trouvé"
+                
+                echo "Création de l'environnement virtuel..."
+                if ! python3 -m venv ${VENV_NAME}; then
+                    echo "ERREUR CRITIQUE: Échec de la création du venv."
+                    echo "Assurez-vous que le paquet 'python3-venv' est installé sur l'agent Jenkins."
+                    echo "Exemple: sudo apt-get install python3-venv"
+                    exit 1
                 fi
+                
+                echo "Activation et installation..."
                 . ${VENV_NAME}/bin/activate
                 pip install -r requirements.txt
+                
+                echo "Vérification du code..."
                 python3 -m py_compile app.py
                 """
              }
