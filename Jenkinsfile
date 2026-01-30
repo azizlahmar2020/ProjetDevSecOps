@@ -67,23 +67,16 @@ pipeline {
             }
         }
 
-        stage('Deploy Helm Chart To kind') {
+       stage('Deploy Helm Chart To kind') {
     steps {
         sh '''
-        
-        # Exporter la variable KUBECONFIG pointant vers le fichier kubeconfig personnalisé
-        export KUBECONFIG=/var/lib/jenkins/kubeconfig-kind-3nodes
-        
-        # Vérifier la connexion au cluster
+        export KUBECONFIG=/var/lib/jenkins/kubeconfig-kind
         kubectl get nodes
-        
-        # Déployer ou mettre à jour la release Helm
         helm upgrade -i python-app ./python-app-helm
         '''
     }
 }
 
-    }
 
     post {
         success {
