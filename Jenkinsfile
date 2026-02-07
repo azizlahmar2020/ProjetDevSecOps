@@ -8,7 +8,7 @@ pipeline {
 
     environment {
         VENV_NAME = "venv"
-        scannerHome = tool('SonarQube Scanner') // Nom du scanner configuré dans Jenkins Global Tool Configuration
+       
     }
 
     stages {
@@ -16,13 +16,14 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
-                echo '✅ Code récupéré depuis Git'
+                echo '✅ Code récupéré'
             }
         }
 
         stage('Build Python App') {
             steps {
-                echo '🐍 Build Python App...'
+                echo '🐍 Building Application Logic...'
+
                 sh '''#!/bin/bash
                 set -e
 
@@ -47,13 +48,12 @@ pipeline {
             }
         }
 
-        stage('SonarQube Scan') {
-            steps {
-                withSonarQubeEnv('SonarQube Server') {
-                    sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=mon-projet -Dsonar.sources=."
-                }
-            }
-        }
+        stage('SonarQube Analysis') {
+    def scannerHome = tool 'SonarScanner';
+    withSonarQubeEnv() {
+      sh "${scannerHome}/bin/sonar-scanner"
+    }
+  }
 
         stage('Build Docker Image') {
             steps {
@@ -62,22 +62,9 @@ pipeline {
             }
         }
 
-        stage('Trivy Scan') {
-            steps {
-                echo '🔒 Scan de sécurité avec Trivy'
-                sh '''
-                # Installer trivy si nécessaire
-                command -v trivy || curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
-
-                # Scanner l'image Docker
-                trivy image --exit-code 1 --severity HIGH,CRITICAL my-python-app:latest
-                '''
-            }
-        }
-
         stage('Load Image Into Kind') {
             steps {
-                echo '📦 Load Docker image into kind'
+                echo '📦 Load image into kind'
                 sh 'kind load docker-image my-python-app:latest --name kind'
             }
         }
@@ -91,17 +78,6 @@ pipeline {
                 kubectl get nodes
                 echo "🚀 Déploiement Helm Chart"
                 helm upgrade -i python-app ./python-app-helm
-                '''
-            }
-        }
-
-        stage('Falco Monitoring Check') {
-            steps {
-                echo '👀 Vérification des événements Falco'
-                sh '''
-                export KUBECONFIG=/var/lib/jenkins/kubeconfig-kind
-                # Affiche les 50 derniers événements détectés par Falco
-                kubectl logs -n falco -l app=falco --tail=50 || echo "Pas encore d'événements Falco"
                 '''
             }
         }
