@@ -24,40 +24,46 @@ pipeline {
                 echo '🐍 Building Application Logic...'
 
                 sh '''#!/bin/bash
-                set -e
+set -e
 
-                echo "🧹 Nettoyage ancien venv"
-                rm -rf venv
+echo "🧹 Nettoyage ancien venv"
+rm -rf venv
 
-                echo "🐍 Version Python"
-                python3 --version
+echo "🐍 Version Python"
+python3 --version
 
-                echo "📦 Création du virtualenv"
-                python3 -m venv venv
+echo "📦 Création du virtualenv"
+python3 -m venv venv
 
-                echo "📂 Vérification venv"
-                ls -l venv/bin
+echo "📂 Vérification venv"
+ls -l venv/bin
 
-                echo "⚡ Activation venv"
-                source venv/bin/activate
+echo "⚡ Activation venv"
+source venv/bin/activate
 
-                echo "⬆️ Upgrade pip"
-                pip install --upgrade pip
+echo "⬆️ Upgrade pip"
+pip install --upgrade pip
 
-                echo "📚 Installation dépendances"
-                pip install -r requirements.txt
+echo "📚 Installation dépendances"
+pip install -r requirements.txt
 
-                echo "🔍 Vérification du code Python"
-                python -m py_compile app.py
-                '''
+echo "🔍 Vérification du code Python"
+python -m py_compile app.py
+'''
             }
         }
+
         stage('SonarQube Analysis') {
-    def scannerHome = tool 'SonarScanner';
-    withSonarQubeEnv() {
-      sh "${scannerHome}/bin/sonar-scanner"
-    }
-  }
+            steps {
+                script {
+                    def scannerHome = tool 'SonarScanner'
+                    withSonarQubeEnv('SonarQube') {
+                        sh "${scannerHome}/bin/sonar-scanner"
+                    }
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 echo '🐳 Build Docker image'
@@ -72,19 +78,19 @@ pipeline {
             }
         }
 
-     stage('Deploy Helm Chart To kind') {
-    steps {
-        sh '''
-        export PATH=$PATH:/snap/bin
-        export KUBECONFIG=/var/lib/jenkins/kubeconfig-kind
-        echo "🌐 Vérification des nodes du cluster"
-        kubectl get nodes
-        echo "🚀 Déploiement Helm Chart"
-        helm upgrade -i python-app ./python-app-helm
-        '''
+        stage('Deploy Helm Chart To kind') {
+            steps {
+                sh '''
+export PATH=$PATH:/snap/bin
+export KUBECONFIG=/var/lib/jenkins/kubeconfig-kind
+echo "🌐 Vérification des nodes du cluster"
+kubectl get nodes
+echo "🚀 Déploiement Helm Chart"
+helm upgrade -i python-app ./python-app-helm
+'''
+            }
+        }
     }
-}
-
 
     post {
         success {
@@ -97,6 +103,4 @@ pipeline {
             echo '🏁 Fin du pipeline'
         }
     }
-
-} // <-- fermeture du pipeline
-
+}
