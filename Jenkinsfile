@@ -8,7 +8,6 @@ pipeline {
 
     environment {
         VENV_NAME = "venv"
-
     }
 
     stages {
@@ -53,14 +52,12 @@ pipeline {
                 '''
             }
         }
-       stage('SonarQube Analysis') {
+        stage('SonarQube Analysis') {
     def scannerHome = tool 'SonarScanner';
     withSonarQubeEnv() {
       sh "${scannerHome}/bin/sonar-scanner"
     }
   }
-
-
         stage('Build Docker Image') {
             steps {
                 echo '🐳 Build Docker image'
@@ -102,3 +99,4 @@ pipeline {
     }
 
 } // <-- fermeture du pipeline
+
