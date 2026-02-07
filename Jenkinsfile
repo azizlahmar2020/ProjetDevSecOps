@@ -8,6 +8,8 @@ pipeline {
 
     environment {
         VENV_NAME = "venv"
+         scannerHome = tool 'SonarQube Scanner' // Nom du scanner dans Global Tool Configuration
+
     }
 
     stages {
@@ -52,6 +54,17 @@ pipeline {
                 '''
             }
         }
+        stage('SonarQube Scan') {
+    environment {
+        scannerHome = tool 'SonarQube Scanner' // Nom du scanner dans Global Tool Configuration
+    }
+    steps {
+        withSonarQubeEnv('SonarQube Server') {   // Nom de la config SonarQube dans Jenkins
+            sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=mon-projet -Dsonar.sources=."
+        }
+    }
+}
+
 
         stage('Build Docker Image') {
             steps {
